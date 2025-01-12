@@ -1,6 +1,6 @@
 A Flutter package for [Material Design's split panes](https://m3.material.io/foundations/layout/applying-layout/pane-layouts#8b4b4334-e530-4bef-8f89-2631986d33ea).
 
-![Screenshot of the SplitPane widget in action](.github/screenshot.png)
+![Screenshot of the SplitPane widget in action](screenshots/example.png)
 
 ## Features
 

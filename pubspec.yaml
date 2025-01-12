@@ -5,7 +5,7 @@ homepage: https://github.com/shaakunuigurumi/split_pane
 issue_tracker: https://github.com/shaakunuigurumi/split_pane/issues
 screenshots:
   - description: "A screenshot of the split_pane example"
-    path: .github/screenshot.png
+    path: screenshots/example.png
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
