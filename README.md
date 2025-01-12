@@ -1,6 +1,4 @@
-# Split pane
-
-Flutter package for [Material Design 3's split panes](https://m3.material.io/foundations/layout/applying-layout/pane-layouts#8b4b4334-e530-4bef-8f89-2631986d33ea).
+A Flutter package for [Material Design's split panes](https://m3.material.io/foundations/layout/applying-layout/pane-layouts#8b4b4334-e530-4bef-8f89-2631986d33ea).
 
 ![Screenshot of the SplitPane widget in action](.github/screenshot.png)
 
@@ -9,7 +7,7 @@ Flutter package for [Material Design 3's split panes](https://m3.material.io/fou
 - [x] Fixed layouts
 - [x] Flexible layouts
 - [ ] Specification-accurate animations
-- [ ] [Acessibility](https://m3.material.io/foundations/layout/understanding-layout/parts-of-layout#c4619e07-cfc6-4d91-a724-0646126e3911)
+- [ ] [Accessibility](https://m3.material.io/foundations/layout/understanding-layout/parts-of-layout#c4619e07-cfc6-4d91-a724-0646126e3911)
 - [ ] Flexible layouts relative to custom center/display features
 - [ ] API quality (theming, inherited data, etc.)
 
