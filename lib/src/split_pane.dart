@@ -22,6 +22,12 @@ enum PrimaryPaneLocation {
 ///  * [SplitController], which controls the split pane.
 ///  * <https://m3.material.io/foundations/layout/applying-layout/pane-layouts#8b4b4334-e530-4bef-8f89-2631986d33ea>
 class SplitPane extends StatefulWidget {
+  /// The [SplitController] of this split pane.
+  ///
+  /// If not provided, a new controller will be created.
+  ///
+  /// You can provide a custom controller to control the split pane or to
+  /// maintain the state of the split pane whenever it disappears.
   final SplitController? controller;
 
   /// The primary pane.

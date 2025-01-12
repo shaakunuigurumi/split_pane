@@ -119,6 +119,7 @@ class SplitController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Gets the current relative animated position.
   double getFraction(double containerSize) {
     if (isAbsolute) {
       return _animationController.value / containerSize;
@@ -127,6 +128,7 @@ class SplitController extends ChangeNotifier {
     return _animationController.value;
   }
 
+  /// Gets the current absolute animated position.
   double getFixed(double containerSize) {
     if (!isAbsolute) {
       return _animationController.value * containerSize;
