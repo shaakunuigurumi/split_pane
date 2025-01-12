@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 /// Placeholder widget depicting a pane.
 class Pane extends StatelessWidget {
-  const Pane({super.key});
+  final Widget? child;
+
+  const Pane({this.child, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,7 @@ class Pane extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.all(Radius.circular(12.0)),
       ),
-      child: SizedBox.expand(),
+      child: child ?? SizedBox.expand(),
     );
   }
 }
