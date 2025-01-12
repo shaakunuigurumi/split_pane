@@ -2,10 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+/// A visual indicator for the [DragHandleContainer].
 class DragHandle extends StatefulWidget {
+  /// Whether the handle is pressed down
   final bool pressed;
+
+  /// The orientation of the handle
   final Axis orientation;
 
+  /// Creates a new [DragHandle] widget.
   const DragHandle({
     super.key,
     this.pressed = false,
@@ -75,8 +80,9 @@ class _DragHandleState extends State<DragHandle>
 
         return Align(
           child: SizedBox(
-            width:
-                widget.orientation == Axis.horizontal ? longLength : shortLength,
+            width: widget.orientation == Axis.horizontal
+                ? longLength
+                : shortLength,
             height:
                 widget.orientation == Axis.vertical ? longLength : shortLength,
             child: DecoratedBox(

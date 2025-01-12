@@ -2,11 +2,15 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 
+/// A layout delegate for the [SplitPane] widget.
 class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
+  /// The size of the secondary pane.
   final double secondarySize;
-  final bool isAbsolute;
-  final double spacerWidth = 24;
 
+  /// Whether the secondary pane size is absolute.
+  final bool isAbsolute;
+
+  /// Creates a new [SplitPaneLayoutDelegate].
   SplitPaneLayoutDelegate({
     required this.secondarySize,
     required this.isAbsolute,
@@ -53,9 +57,7 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
     positionChild(divider, dividerPosition);
 
     // 4. layout primary pane
-
     final dividerBleed = clampDouble(secondaryWidth / dividerWidth, 0, 1);
-
 
     var primaryWidth = clampDouble(
       size.width - secondaryWidth - dividerWidth * dividerBleed,

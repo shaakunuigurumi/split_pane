@@ -1,19 +1,49 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:split_pane/src/drag_handle.dart';
+import 'package:split_pane/src/drag_handle_container.dart';
 import 'package:split_pane/src/split_controller.dart';
 import 'package:split_pane/src/split_pane_layout_delegate.dart';
 
-enum PrimaryPaneLocation { leading, trailing }
+/// The location of the primary pane.
+///
+/// In left-to-right locales, the primary pane is on the [trailing] side. In
+/// right-to-left locales, the primary pane is on the [leading] side.
+enum PrimaryPaneLocation {
+  /// The primary pane is on the leading (for LTR, left) side.
+  leading,
 
+  /// The primary pane is on the trailing (for LTR, right) side.
+  trailing,
+}
+
+/// A Material Design split pane.
+///
+/// See also:
+///
+///  * [SplitController], which controls the split pane.
+///  * <https://m3.material.io/foundations/layout/applying-layout/pane-layouts#8b4b4334-e530-4bef-8f89-2631986d33ea>
 class SplitPane extends StatefulWidget {
   final SplitController? controller;
+
+  /// The primary pane.
+  ///
+  /// This is usually a detail view.
   final Widget primary;
+
+  /// The secondary pane.
+  ///
+  /// This is usually a list view.
   final Widget secondary;
+
+  /// A list of widths where the secondary pane should snap to.
   final List<double>? snapWidths;
+
+  /// The direction of the split pane.
   final Axis direction;
+
+  /// The location of the primary pane.
   final PrimaryPaneLocation primaryPaneLocation;
 
+  /// Creates a new [SplitPane] widget.
   const SplitPane({
     super.key,
     this.controller,
@@ -136,71 +166,5 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
         curve,
       );
     }
-  }
-}
-
-class DragHandleContainer extends StatefulWidget {
-  final GestureDragUpdateCallback? onDrag;
-  final GestureDragEndCallback? onDragEnd;
-  final Axis orientation;
-  final double handleAlignment;
-
-  const DragHandleContainer({
-    super.key,
-    this.onDrag,
-    this.onDragEnd,
-    this.orientation = Axis.vertical,
-    this.handleAlignment = 0.5,
-  });
-
-  @override
-  State<DragHandleContainer> createState() => _DragHandleContainerState();
-}
-
-class _DragHandleContainerState extends State<DragHandleContainer> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isHorizontal = widget.orientation == Axis.horizontal;
-    final isVertical = widget.orientation == Axis.vertical;
-
-    return MouseRegion(
-      cursor: switch (widget.orientation) {
-        Axis.horizontal => SystemMouseCursors.resizeRow,
-        Axis.vertical => SystemMouseCursors.resizeColumn,
-      },
-      child: SizedBox(
-        width: isVertical ? 24.0 : null,
-        height: isHorizontal ? 24.0 : null,
-        child: GestureDetector(
-          dragStartBehavior: DragStartBehavior.down,
-          behavior: HitTestBehavior.translucent,
-          onVerticalDragStart: isHorizontal ? onDragStart : null,
-          onVerticalDragUpdate: isHorizontal ? widget.onDrag : null,
-          onVerticalDragEnd: isHorizontal ? onDragEnd : null,
-          onHorizontalDragUpdate: isVertical ? widget.onDrag : null,
-          onHorizontalDragStart: isVertical ? onDragStart : null,
-          onHorizontalDragEnd: isVertical ? onDragEnd : null,
-          child: AnimatedAlign(
-            alignment: Alignment(
-              isHorizontal ? widget.handleAlignment : 0.5,
-              isVertical ? widget.handleAlignment : 0.5,
-            ),
-            duration: Durations.medium1,
-            child: DragHandle(pressed: _pressed),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void onDragStart(DragStartDetails details) {
-    setState(() => _pressed = true);
-  }
-
-  void onDragEnd(DragEndDetails details) {
-    setState(() => _pressed = false);
-    widget.onDragEnd?.call(details);
   }
 }

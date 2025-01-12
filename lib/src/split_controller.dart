@@ -1,18 +1,26 @@
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
+/// Controls a [SplitPane].
 class SplitController extends ChangeNotifier {
   late final AnimationController _animationController;
 
+  /// Whether the current position of the split pane is absolute.
+  ///
+  /// If true, the [position] value is the absolute position of the split pane
+  /// in dp. If false, the [position] value is a fraction of the container size
+  /// (e.g. `0.5` for 50%).
+
   bool isAbsolute = false;
 
-  /// The current position of the split pane.
+  /// The current position .
   ///
-  /// If [isAbsolute] is true, this value is the absolute position of the split
-  /// pane, otherwise it is a double ranging from 0 to 1, relative to the
-  /// container's size.
+  /// See also:
+  ///
+  /// - [isAbsolute], which determines whether this value is absolute or a fraction.
   double position = 0.5;
 
+  /// Creates a new [SplitController].
   SplitController({required TickerProvider vsync}) {
     _animationController = AnimationController.unbounded(
       value: position,
@@ -20,10 +28,13 @@ class SplitController extends ChangeNotifier {
     );
   }
 
+  /// Whether the leading pane is collapsed.
   bool get leadingCollapsed => position <= 0.0;
 
+  /// Whether the trailing pane is collapsed.
   bool get trailingCollapsed => position >= 1.0;
 
+  /// Animated value of the [position].
   Animation<double> get animation => _animationController.view;
 
   @override
@@ -32,6 +43,7 @@ class SplitController extends ChangeNotifier {
     _animationController.dispose();
   }
 
+  /// Animates the split pane to a [fraction] of the [containerSize].
   void animateToFraction(
     double fraction,
     double containerSize,
@@ -58,6 +70,7 @@ class SplitController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Animates the split pane to a fixed [value].
   void animateToFixed(
     double value,
     double containerSize,
@@ -84,6 +97,7 @@ class SplitController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets the split pane to an fixed size of the following [value].
   void setToFixed(double value) {
     if (value < 0) {
       throw ArgumentError.value(value, 'value');
@@ -94,11 +108,12 @@ class SplitController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets the split pane to a fraction of the following [value].
   void setToFraction(double value) {
     if (value < 0 || value > 1.0) {
       throw ArgumentError.value(value, 'value');
     }
-    
+
     position = _animationController.value = value;
     isAbsolute = false;
     notifyListeners();
