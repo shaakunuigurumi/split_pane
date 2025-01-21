@@ -3,15 +3,20 @@ import 'package:split_pane/src/drag_handle_container.dart';
 import 'package:split_pane/src/split_controller.dart';
 import 'package:split_pane/src/split_pane_layout_delegate.dart';
 
-/// The location of the primary pane.
+/// Defines the location of a pane within a split view.
 ///
-/// In left-to-right locales, the primary pane is on the [trailing] side. In
-/// right-to-left locales, the primary pane is on the [leading] side.
-enum PrimaryPaneLocation {
-  /// The primary pane is on the leading (for LTR, left) side.
+/// The position of the pane depends on the text direction:
+/// - In left-to-right (LTR) locales, the [trailing] side refers to the right, and the [leading] side refers to the left.
+/// - In right-to-left (RTL) locales, the [trailing] side refers to the left, and the [leading] side refers to the right.
+enum PaneLocation {
+  /// The pane is positioned on the leading side:
+  /// - Left side in LTR locales.
+  /// - Right side in RTL locales.
   leading,
 
-  /// The primary pane is on the trailing (for LTR, right) side.
+  /// The pane is positioned on the trailing side:
+  /// - Right side in LTR locales.
+  /// - Left side in RTL locales.
   trailing,
 }
 
@@ -47,7 +52,7 @@ class SplitPane extends StatefulWidget {
   final Axis direction;
 
   /// The location of the primary pane.
-  final PrimaryPaneLocation primaryPaneLocation;
+  final PaneLocation primaryPaneLocation;
 
   /// Creates a new [SplitPane] widget.
   const SplitPane({
@@ -56,7 +61,7 @@ class SplitPane extends StatefulWidget {
     required this.primary,
     required this.secondary,
     this.snapWidths = const [360.0, 412.0],
-    this.primaryPaneLocation = PrimaryPaneLocation.trailing,
+    this.primaryPaneLocation = PaneLocation.trailing,
     this.direction = Axis.horizontal,
   });
 
