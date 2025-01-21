@@ -93,6 +93,7 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
               delegate: SplitPaneLayoutDelegate(
                 secondarySize: _controller.animation.value,
                 isAbsolute: _controller.isAbsolute,
+                direction: widget.direction,
               ),
               children: [
                 LayoutId(id: 1, child: widget.primary),
@@ -100,6 +101,10 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
                 LayoutId(
                   id: 0,
                   child: DragHandleContainer(
+                    orientation: switch (widget.direction) {
+                      Axis.horizontal => Axis.vertical,
+                      Axis.vertical => Axis.horizontal,
+                    },
                     onDrag: (details) => onDrag(details, width, height),
                     onDragEnd: (details) => onDragEnd(details, width, height),
                   ),
@@ -125,22 +130,46 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
   }
 
   void onDragEnd(DragEndDetails details, double width, double height) {
-    final currentAbsolute = _controller.getFixed(width);
-
-    final closestAbsoluteSnapPoint = widget.snapWidths?.reduce((a, b) {
-      final aDistance = (a - currentAbsolute).abs();
-      final bDistance = (b - currentAbsolute).abs();
-
-      return aDistance < bDistance ? a : b;
+    snap(switch (widget.direction) {
+      Axis.horizontal => width,
+      Axis.vertical => height,
     });
+  }
 
-    final currentFraction = _controller.getFraction(width);
-    final closestFractionalSnapPoint = [0.0, 0.5, 1.0].reduce((a, b) {
-      final aDistance = (a - currentFraction).abs();
-      final bDistance = (b - currentFraction).abs();
+  void snap(double containerSize) {
+    final (closestSnapPoint, useFraction) =
+        _closestSnapPoint(_controller.position, containerSize);
 
-      return aDistance < bDistance ? a : b;
-    });
+    final duration = Durations.short4;
+    final curve = Curves.easeOutBack;
+    if (useFraction) {
+      _controller.animateToFraction(
+        closestSnapPoint,
+        containerSize,
+        duration,
+        curve,
+      );
+    } else {
+      _controller.animateToFixed(
+        closestSnapPoint,
+        containerSize,
+        duration,
+        curve,
+      );
+    }
+  }
+
+  (double value, bool isAbsolute) _closestSnapPoint(
+      double value, double containerSize) {
+    final currentAbsolute = _controller.getFixed(containerSize);
+
+    final snapWidths = widget.snapWidths;
+    final closestAbsoluteSnapPoint =
+        snapWidths == null ? null : _closest(snapWidths, currentAbsolute);
+
+    final currentFraction = _controller.getFraction(containerSize);
+    final closestFractionalSnapPoint =
+        _closest([0.0, 0.5, 1.0], currentFraction);
 
     bool useFraction = false;
 
@@ -150,27 +179,24 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
       final absoluteDistance =
           (closestAbsoluteSnapPoint - currentAbsolute).abs();
       final fractionalDistance =
-          ((closestFractionalSnapPoint * width) - currentAbsolute).abs();
+          ((closestFractionalSnapPoint * containerSize) - currentAbsolute)
+              .abs();
 
       useFraction = fractionalDistance < absoluteDistance;
     }
 
-    var duration = Durations.short4;
-    var curve = Curves.easeOutBack;
-    if (useFraction) {
-      _controller.animateToFraction(
-        closestFractionalSnapPoint,
-        width,
-        duration,
-        curve,
-      );
-    } else {
-      _controller.animateToFixed(
-        closestAbsoluteSnapPoint!,
-        width,
-        duration,
-        curve,
-      );
-    }
+    return (
+      useFraction ? closestFractionalSnapPoint : closestAbsoluteSnapPoint!,
+      useFraction
+    );
   }
+}
+
+T _closest<T extends num>(Iterable<T> values, T value) {
+  return values.reduce((a, b) {
+    final aDistance = (a - value).abs();
+    final bDistance = (b - value).abs();
+
+    return aDistance < bDistance ? a : b;
+  });
 }

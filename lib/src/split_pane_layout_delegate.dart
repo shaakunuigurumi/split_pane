@@ -10,10 +10,14 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
   /// Whether the secondary pane size is absolute.
   final bool isAbsolute;
 
+  /// In which direction the split pane is split.
+  final Axis direction;
+
   /// Creates a new [SplitPaneLayoutDelegate].
   SplitPaneLayoutDelegate({
     required this.secondarySize,
     required this.isAbsolute,
+    required this.direction,
   });
 
   @override
@@ -22,62 +26,108 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
     const primary = 1;
     const secondary = 2;
 
-    // 1. layout divider
-    final dividerConstraints = BoxConstraints(
-      minWidth: 0,
-      maxWidth: size.width,
-      minHeight: size.height,
-      maxHeight: size.height,
-    );
+    final (mainAxisExtent, crossAxisExtent) = switch (direction) {
+      Axis.horizontal => (size.width, size.height),
+      Axis.vertical => (size.height, size.width),
+    };
 
-    final Size(width: dividerWidth) = layoutChild(divider, dividerConstraints);
+    // 1. layout divider
+    final dividerConstraints = switch (direction) {
+      Axis.horizontal => BoxConstraints(
+          minWidth: 0,
+          maxWidth: size.width,
+          minHeight: size.height,
+          maxHeight: size.height,
+        ),
+      Axis.vertical => BoxConstraints(
+          minWidth: size.width,
+          maxWidth: size.width,
+          minHeight: 0,
+          maxHeight: size.height,
+        ),
+    };
+
+    final Size(width: dividerWidth, height: dividerHeight) =
+        layoutChild(divider, dividerConstraints);
+
+    final dividerExtent = switch (direction) {
+      Axis.horizontal => dividerWidth,
+      Axis.vertical => dividerHeight,
+    };
 
     // 2. layout secondary pane
-    final secondaryWidth = clampDouble(
-      isAbsolute ? secondarySize : size.width * secondarySize,
+    final secondaryExtent = clampDouble(
+      isAbsolute
+          ? secondarySize
+          : (mainAxisExtent * secondarySize) - dividerExtent,
       0.0,
-      size.width,
+      mainAxisExtent,
     );
 
-    layoutChild(
-      secondary,
-      BoxConstraints.tightFor(width: secondaryWidth, height: size.height),
-    );
+    final secondaryConstraints = switch (direction) {
+      Axis.horizontal => BoxConstraints.tightFor(
+          width: secondaryExtent,
+          height: size.height,
+        ),
+      Axis.vertical => BoxConstraints.tightFor(
+          width: size.width,
+          height: secondaryExtent,
+        ),
+    };
+
+    layoutChild(secondary, secondaryConstraints);
 
     positionChild(secondary, Offset.zero);
 
     // 3. position divider
 
-    final dividerLeft = clampDouble(
-      secondaryWidth,
+    final dividerPosition = clampDouble(
+      secondaryExtent,
       0.0,
-      size.width - dividerWidth,
+      mainAxisExtent - dividerExtent,
     );
-    final dividerPosition = Offset(dividerLeft, 0);
-    positionChild(divider, dividerPosition);
+
+    final dividerOffset = switch (direction) {
+      Axis.horizontal => Offset(dividerPosition, 0),
+      Axis.vertical => Offset(0, dividerPosition),
+    };
+
+    positionChild(divider, dividerOffset);
 
     // 4. layout primary pane
-    final dividerBleed = clampDouble(secondaryWidth / dividerWidth, 0, 1);
+    final dividerBleed = clampDouble(secondaryExtent / dividerExtent, 0, 1);
 
-    var primaryWidth = clampDouble(
-      size.width - secondaryWidth - dividerWidth * dividerBleed,
+    var primarySize = clampDouble(
+      mainAxisExtent - secondaryExtent - dividerExtent * dividerBleed,
       0,
-      size.width,
+      mainAxisExtent,
     );
 
-    final primaryConstraints = BoxConstraints.tightFor(
-      width: primaryWidth,
-      height: size.height,
-    );
+    final primaryConstraints = switch (direction) {
+      Axis.horizontal => BoxConstraints.tightFor(
+          width: primarySize,
+          height: size.height,
+        ),
+      Axis.vertical => BoxConstraints.tightFor(
+          height: primarySize,
+          width: size.width,
+        ),
+    };
 
     layoutChild(primary, primaryConstraints);
 
-    positionChild(primary, Offset(size.width - primaryWidth, 0));
+    final primaryOffset = switch (direction) {
+      Axis.horizontal => Offset(mainAxisExtent - primarySize, 0),
+      Axis.vertical => Offset(0, mainAxisExtent - primarySize),
+    };
+
+    positionChild(primary, primaryOffset);
   }
 
   @override
   bool shouldRelayout(covariant SplitPaneLayoutDelegate oldDelegate) {
     return secondarySize != oldDelegate.secondarySize ||
-        isAbsolute != oldDelegate.isAbsolute;
+        isAbsolute != oldDelegate.isAbsolute ||
+        direction != oldDelegate.direction;
   }
 }

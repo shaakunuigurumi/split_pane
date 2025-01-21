@@ -21,7 +21,7 @@ class DragHandleContainer extends StatefulWidget {
     super.key,
     this.onDrag,
     this.onDragEnd,
-    this.orientation = Axis.vertical,
+    required this.orientation,
     this.handleAlignment = 0.5,
   });
 
@@ -48,30 +48,33 @@ class _DragHandleContainerState extends State<DragHandleContainer> {
         child: GestureDetector(
           dragStartBehavior: DragStartBehavior.down,
           behavior: HitTestBehavior.translucent,
-          onVerticalDragStart: isHorizontal ? onDragStart : null,
+          onVerticalDragStart: isHorizontal ? _onDragStart : null,
           onVerticalDragUpdate: isHorizontal ? widget.onDrag : null,
-          onVerticalDragEnd: isHorizontal ? onDragEnd : null,
+          onVerticalDragEnd: isHorizontal ? _onDragEnd : null,
           onHorizontalDragUpdate: isVertical ? widget.onDrag : null,
-          onHorizontalDragStart: isVertical ? onDragStart : null,
-          onHorizontalDragEnd: isVertical ? onDragEnd : null,
+          onHorizontalDragStart: isVertical ? _onDragStart : null,
+          onHorizontalDragEnd: isVertical ? _onDragEnd : null,
           child: AnimatedAlign(
             alignment: Alignment(
               isHorizontal ? widget.handleAlignment : 0.5,
               isVertical ? widget.handleAlignment : 0.5,
             ),
             duration: Durations.medium1,
-            child: DragHandle(pressed: _pressed),
+            child: DragHandle(
+              pressed: _pressed,
+              orientation: widget.orientation,
+            ),
           ),
         ),
       ),
     );
   }
 
-  void onDragStart(DragStartDetails details) {
+  void _onDragStart(DragStartDetails details) {
     setState(() => _pressed = true);
   }
 
-  void onDragEnd(DragEndDetails details) {
+  void _onDragEnd(DragEndDetails details) {
     setState(() => _pressed = false);
     widget.onDragEnd?.call(details);
   }
