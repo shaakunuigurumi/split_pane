@@ -105,8 +105,8 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
                       Axis.horizontal => Axis.vertical,
                       Axis.vertical => Axis.horizontal,
                     },
-                    onDrag: (details) => onDrag(details, width, height),
-                    onDragEnd: (details) => onDragEnd(details, width, height),
+                    onDrag: (details) => _onDrag(details, width, height),
+                    onDragEnd: (details) => _onDragEnd(details, width, height),
                   ),
                 ),
               ],
@@ -117,7 +117,7 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     );
   }
 
-  void onDrag(DragUpdateDetails details, double width, double height) {
+  void _onDrag(DragUpdateDetails details, double width, double height) {
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     final Offset(:dx, :dy) = renderBox.globalToLocal(details.globalPosition);
 
@@ -129,7 +129,7 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     _controller.setToFraction(fraction);
   }
 
-  void onDragEnd(DragEndDetails details, double width, double height) {
+  void _onDragEnd(DragEndDetails details, double width, double height) {
     snap(switch (widget.direction) {
       Axis.horizontal => width,
       Axis.vertical => height,
