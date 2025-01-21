@@ -1,4 +1,5 @@
 import 'package:example/pane.dart';
+import 'package:example/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:split_pane/split_pane.dart';
 
@@ -9,7 +10,11 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: HomePage(), debugShowCheckedModeBanner: false);
+    return MaterialApp(
+      theme: theme,
+      home: HomePage(),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
 
@@ -23,6 +28,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late final SplitController _controller;
+  Axis _direction = Axis.horizontal;
 
   @override
   void initState() {
@@ -40,30 +46,32 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: theme.colorScheme.surfaceContainer,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: ListenableBuilder(
           listenable: _controller,
           builder: (context, _) {
-            String getSecondarySizeText() {
-              if (_controller.isAbsolute) {
-                return '${_controller.position.toStringAsFixed(0)} dp';
-              } else {
-                return '${(_controller.position * 100).toStringAsFixed(0)}%';
-              }
-            }
-
             return SplitPane(
               controller: _controller,
-              primary: Pane(),
+              direction: _direction,
+              primary: Pane(
+                child: Center(
+                  child: IconButton(
+                    icon: Icon(Icons.rotate_left),
+                    tooltip: 'Rotate',
+                    onPressed: () {
+                      setState(() => _direction = _direction == Axis.horizontal
+                          ? Axis.vertical
+                          : Axis.horizontal);
+                    },
+                  ),
+                ),
+              ),
               secondary: ClipRect(
                 child: Pane(
                   child: Center(
                     child: Text(
-                      getSecondarySizeText(),
-                      maxLines: 1,
-                      softWrap: false,
+                      sizeAsString,
                     ),
                   ),
                 ),
@@ -73,5 +81,16 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
+  }
+
+  String get sizeAsString {
+    final position = _controller.position;
+    if (_controller.isAbsolute) {
+      final dp = position.toStringAsFixed(0);
+      return '$dp dp';
+    } else {
+      final percent = (position * 100).toStringAsFixed(0);
+      return '$percent%';
+    }
   }
 }
