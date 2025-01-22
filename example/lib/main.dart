@@ -1,4 +1,5 @@
 import 'package:example/pane.dart';
+import 'package:example/rotate_button.dart';
 import 'package:example/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:split_pane/split_pane.dart';
@@ -56,23 +57,13 @@ class _HomePageState extends State<HomePage>
               direction: _direction,
               primary: Pane(
                 child: Center(
-                  child: IconButton(
-                    icon: Icon(Icons.rotate_left),
-                    tooltip: 'Rotate',
-                    onPressed: () {
-                      setState(() => _direction = _direction == Axis.horizontal
-                          ? Axis.vertical
-                          : Axis.horizontal);
-                    },
-                  ),
+                  child: RotateButton(onPressed: _onRotate),
                 ),
               ),
               secondary: ClipRect(
                 child: Pane(
                   child: Center(
-                    child: Text(
-                      sizeAsString,
-                    ),
+                    child: Text(sizeAsString),
                   ),
                 ),
               ),
@@ -81,6 +72,11 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
+  }
+
+  void _onRotate() {
+    setState(() => _direction =
+        _direction == Axis.horizontal ? Axis.vertical : Axis.horizontal);
   }
 
   String get sizeAsString {
