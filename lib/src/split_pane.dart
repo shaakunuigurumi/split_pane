@@ -195,6 +195,25 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
       useFraction
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+
+    properties.add(
+      DiagnosticsProperty<SplitController?>('controller', widget.controller),
+    );
+    properties.add(DiagnosticsProperty<Widget>('primary', widget.primary));
+    properties.add(DiagnosticsProperty<Widget>('secondary', widget.secondary));
+    properties.add(IterableProperty<double>('snapWidths', widget.snapWidths));
+    properties.add(EnumProperty<Axis>('direction', widget.direction));
+    properties.add(
+      EnumProperty<PaneLocation>(
+        'primaryPaneLocation',
+        widget.primaryPaneLocation,
+      ),
+    );
+  }
 }
 
 T _closest<T extends num>(Iterable<T> values, T value) {
