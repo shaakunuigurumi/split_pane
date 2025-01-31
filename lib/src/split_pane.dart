@@ -177,8 +177,11 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     final (closestSnapPoint, useFraction) =
         _closestSnapPoint(_controller.position, containerSize);
 
-    final duration = Durations.short4;
-    final curve = Curves.easeOutBack;
+    final splitPaneThemeData = Theme.of(context).extension<SplitPaneThemeData>();
+
+    final duration = splitPaneThemeData?.snapDuration ?? Durations.short4;
+    final curve = splitPaneThemeData?.snapCurve ?? Curves.easeOutBack;
+
     if (useFraction) {
       _controller.animateToFraction(
         closestSnapPoint,

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:split_pane/src/split_pane_theme_data.dart';
 
 /// A visual indicator for the [DragHandleContainer].
 class DragHandle extends StatefulWidget {
@@ -67,14 +68,26 @@ class _DragHandleState extends State<DragHandle>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    final splitPaneTheme = theme.extension<SplitPaneThemeData>();
+
+    final fallback = WidgetStateColor.fromMap({
+      WidgetState.pressed: theme.colorScheme.onSurface,
+      WidgetState.any: theme.colorScheme.outline,
+    });
+
+    final dragHandleColor = (splitPaneTheme?.dragHandleColor ?? fallback);
+
+    final pressedColor = dragHandleColor.resolve({WidgetState.pressed});
+    final defaultColor = dragHandleColor.resolve({});
+
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
         final longLength = lerpDouble(48, 52, animation.value);
         final shortLength = lerpDouble(4, 12, animation.value);
         final handleColor = Color.lerp(
-          theme.colorScheme.outline,
-          theme.colorScheme.onSurface,
+          defaultColor,
+          pressedColor,
           animation.value,
         );
 
