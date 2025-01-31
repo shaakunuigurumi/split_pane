@@ -8,6 +8,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  material_symbols_icons: ^4.2801.8
   split_pane:
     path: ..
 

@@ -1,5 +1,6 @@
 import 'package:example/pane.dart';
 import 'package:example/rotate_button.dart';
+import 'package:example/switch_pane_button.dart';
 import 'package:example/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:split_pane/split_pane.dart';
@@ -30,6 +31,7 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late final SplitController _controller;
   Axis _direction = Axis.horizontal;
+  PaneLocation _paneLocation = PaneLocation.trailing;
 
   @override
   void initState() {
@@ -55,9 +57,21 @@ class _HomePageState extends State<HomePage>
             return SplitPane(
               controller: _controller,
               direction: _direction,
+              primaryPaneLocation: _paneLocation,
               primary: Pane(
                 child: Center(
-                  child: RotateButton(onPressed: _onRotate),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8.0,
+                    children: [
+                      RotateButton(onPressed: _onRotate),
+                      SwitchPaneButton(
+                        paneLocation: _paneLocation,
+                        direction: _direction,
+                        onPressed: _onSwitchPane,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               secondary: ClipRect(
@@ -88,5 +102,14 @@ class _HomePageState extends State<HomePage>
       final percent = (position * 100).toStringAsFixed(0);
       return '$percent%';
     }
+  }
+
+  void _onSwitchPane() {
+    setState(() {
+      _paneLocation = switch (_paneLocation) {
+        PaneLocation.leading => PaneLocation.trailing,
+        PaneLocation.trailing => PaneLocation.leading,
+      };
+    });
   }
 }
