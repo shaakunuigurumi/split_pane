@@ -1,6 +1,6 @@
 name: split_pane
 description: "A Flutter package for Material Design's split-pane layouts"
-version: 0.1.0
+version: 0.2.0
 homepage: https://github.com/shaakunuigurumi/split_pane
 issue_tracker: https://github.com/shaakunuigurumi/split_pane/issues
 screenshots:
