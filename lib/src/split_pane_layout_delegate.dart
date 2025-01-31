@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/rendering.dart';
 
 /// A layout delegate for the [SplitPane] widget.
@@ -70,7 +68,6 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
       secondaryExtent = availableExtent * secondarySize;
       primaryExtent = availableExtent - secondaryExtent;
     }
-
 
     primaryExtent = primaryExtent.clamp(0.0, mainAxisExtent);
     secondaryExtent = secondaryExtent.clamp(0.0, mainAxisExtent);

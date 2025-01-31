@@ -189,7 +189,8 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     final (closestSnapPoint, useFraction) =
         _closestSnapPoint(_controller.position, containerSize);
 
-    final splitPaneThemeData = Theme.of(context).extension<SplitPaneThemeData>();
+    final splitPaneThemeData =
+        Theme.of(context).extension<SplitPaneThemeData>();
 
     final duration = splitPaneThemeData?.snapDuration ?? Durations.short4;
     final curve = splitPaneThemeData?.snapCurve ?? Curves.easeOutBack;
@@ -236,7 +237,7 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     useFraction = fractionalDistance < absoluteDistance;
 
     return (
-      useFraction ? closestFractionalSnapPoint : closestAbsoluteSnapPoint!,
+      useFraction ? closestFractionalSnapPoint : closestAbsoluteSnapPoint,
       useFraction
     );
   }

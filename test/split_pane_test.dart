@@ -31,7 +31,8 @@ void main() {
     primarySize = widgetTester.getSize(find.byKey(primaryKey));
     secondarySize = widgetTester.getSize(find.byKey(secondaryKey));
 
-    final remainingSize = splitPaneSize.width - primarySize.width - secondarySize.width;
+    final remainingSize =
+        splitPaneSize.width - primarySize.width - secondarySize.width;
 
     expect(remainingSize, lessThanOrEqualTo(24.0));
     expect(primarySize, isNot(secondarySize));
