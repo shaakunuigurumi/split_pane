@@ -13,11 +13,15 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
   /// In which direction the split pane is split.
   final Axis direction;
 
+  /// Whether to invert the order of the panes.
+  final bool invertPaneOrder;
+
   /// Creates a new [SplitPaneLayoutDelegate].
   SplitPaneLayoutDelegate({
     required this.secondarySize,
     required this.isAbsolute,
     required this.direction,
+    required this.invertPaneOrder,
   });
 
   @override
@@ -54,15 +58,22 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
       Axis.horizontal => dividerWidth,
       Axis.vertical => dividerHeight,
     };
+    final availableExtent = mainAxisExtent - dividerExtent;
 
-    // 2. layout secondary pane
-    final secondaryExtent = clampDouble(
-      isAbsolute
-          ? secondarySize
-          : (mainAxisExtent * secondarySize) - dividerExtent,
-      0.0,
-      mainAxisExtent,
-    );
+    double primaryExtent;
+    double secondaryExtent;
+
+    if (isAbsolute) {
+      secondaryExtent = secondarySize;
+      primaryExtent = availableExtent - secondaryExtent;
+    } else {
+      secondaryExtent = availableExtent * secondarySize;
+      primaryExtent = availableExtent - secondaryExtent;
+    }
+
+
+    primaryExtent = primaryExtent.clamp(0.0, mainAxisExtent);
+    secondaryExtent = secondaryExtent.clamp(0.0, mainAxisExtent);
 
     final secondaryConstraints = switch (direction) {
       Axis.horizontal => BoxConstraints.tightFor(
@@ -75,59 +86,61 @@ class SplitPaneLayoutDelegate extends MultiChildLayoutDelegate {
         ),
     };
 
-    layoutChild(secondary, secondaryConstraints);
-
-    positionChild(secondary, Offset.zero);
-
-    // 3. position divider
-
-    final dividerPosition = clampDouble(
-      secondaryExtent,
-      0.0,
-      mainAxisExtent - dividerExtent,
-    );
-
-    final dividerOffset = switch (direction) {
-      Axis.horizontal => Offset(dividerPosition, 0),
-      Axis.vertical => Offset(0, dividerPosition),
-    };
-
-    positionChild(divider, dividerOffset);
-
-    // 4. layout primary pane
-    final dividerBleed = clampDouble(secondaryExtent / dividerExtent, 0, 1);
-
-    var primarySize = clampDouble(
-      mainAxisExtent - secondaryExtent - dividerExtent * dividerBleed,
-      0,
-      mainAxisExtent,
-    );
-
     final primaryConstraints = switch (direction) {
       Axis.horizontal => BoxConstraints.tightFor(
-          width: primarySize,
+          width: primaryExtent,
           height: size.height,
         ),
       Axis.vertical => BoxConstraints.tightFor(
-          height: primarySize,
           width: size.width,
+          height: primaryExtent,
         ),
     };
 
+    if (invertPaneOrder) {
+      positionChild(primary, Offset.zero);
+
+      final secondaryOffset = mainAxisExtent - secondaryExtent;
+
+      positionChild(
+        secondary,
+        switch (direction) {
+          Axis.horizontal => Offset(secondaryOffset, 0),
+          Axis.vertical => Offset(0, secondaryOffset),
+        },
+      );
+    } else {
+      positionChild(secondary, Offset.zero);
+
+      final primaryOffset = mainAxisExtent - primaryExtent;
+
+      positionChild(
+        primary,
+        switch (direction) {
+          Axis.horizontal => Offset(primaryOffset, 0),
+          Axis.vertical => Offset(0, primaryOffset),
+        },
+      );
+    }
+
     layoutChild(primary, primaryConstraints);
+    layoutChild(secondary, secondaryConstraints);
 
-    final primaryOffset = switch (direction) {
-      Axis.horizontal => Offset(mainAxisExtent - primarySize, 0),
-      Axis.vertical => Offset(0, mainAxisExtent - primarySize),
-    };
-
-    positionChild(primary, primaryOffset);
+    final leadingPaneExtent = invertPaneOrder ? primaryExtent : secondaryExtent;
+    positionChild(
+      divider,
+      switch (direction) {
+        Axis.horizontal => Offset(leadingPaneExtent, 0),
+        Axis.vertical => Offset(0, leadingPaneExtent),
+      },
+    );
   }
 
   @override
   bool shouldRelayout(covariant SplitPaneLayoutDelegate oldDelegate) {
     return secondarySize != oldDelegate.secondarySize ||
         isAbsolute != oldDelegate.isAbsolute ||
-        direction != oldDelegate.direction;
+        direction != oldDelegate.direction ||
+        invertPaneOrder != oldDelegate.invertPaneOrder;
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:split_pane/split_pane.dart';
 import 'package:split_pane/src/drag_handle_container.dart';
-import 'package:split_pane/src/split_controller.dart';
 import 'package:split_pane/src/split_pane_layout_delegate.dart';
 
 /// Defines the location of a pane within a split view.
@@ -91,6 +91,17 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+
+    var invertPaneOrder = widget.primaryPaneLocation != PaneLocation.trailing;
+
+    final needsToInvertHorizontal = widget.direction == Axis.horizontal &&
+        textDirection != TextDirection.ltr;
+
+    if (needsToInvertHorizontal) {
+      invertPaneOrder = !invertPaneOrder;
+    }
+
     return AnimatedBuilder(
       animation: _controller.animation,
       builder: (context, _) {
@@ -99,6 +110,7 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
             secondarySize: _controller.animation.value,
             isAbsolute: _controller.isAbsolute,
             direction: widget.direction,
+            invertPaneOrder: invertPaneOrder,
           ),
           children: [
             LayoutId(id: 1, child: widget.primary),
