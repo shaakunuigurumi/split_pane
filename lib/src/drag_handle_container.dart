@@ -10,6 +10,9 @@ class DragHandleContainer extends StatefulWidget {
   /// Callback for when the drag ends.
   final GestureDragEndCallback? onDragEnd;
 
+  /// Callback for when the drag starts.
+  final GestureDragStartCallback? onDragStart;
+
   /// The orientation of the handle.
   final Axis orientation;
 
@@ -20,6 +23,7 @@ class DragHandleContainer extends StatefulWidget {
   const DragHandleContainer({
     super.key,
     this.onDrag,
+    this.onDragStart,
     this.onDragEnd,
     required this.orientation,
     this.handleAlignment = 0.5,
@@ -72,6 +76,7 @@ class _DragHandleContainerState extends State<DragHandleContainer> {
 
   void _onDragStart(DragStartDetails details) {
     setState(() => _pressed = true);
+    widget.onDragStart?.call(details);
   }
 
   void _onDragEnd(DragEndDetails details) {

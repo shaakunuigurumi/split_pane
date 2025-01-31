@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:split_pane/src/drag_handle_container.dart';
 import 'package:split_pane/src/split_controller.dart';
@@ -70,11 +71,15 @@ class SplitPane extends StatefulWidget {
 }
 
 class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
+  late final GlobalKey _dragHandleKey;
   late final SplitController _controller;
+  late Offset _startOffset;
 
   @override
   void initState() {
     super.initState();
+
+    _dragHandleKey = GlobalKey(debugLabel: 'drag handle');
     _controller = widget.controller ?? SplitController(vsync: this);
   }
 
@@ -89,56 +94,83 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     return AnimatedBuilder(
       animation: _controller.animation,
       builder: (context, _) {
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final height = constraints.maxHeight;
-
-            return CustomMultiChildLayout(
-              delegate: SplitPaneLayoutDelegate(
-                secondarySize: _controller.animation.value,
-                isAbsolute: _controller.isAbsolute,
-                direction: widget.direction,
+        return CustomMultiChildLayout(
+          delegate: SplitPaneLayoutDelegate(
+            secondarySize: _controller.animation.value,
+            isAbsolute: _controller.isAbsolute,
+            direction: widget.direction,
+          ),
+          children: [
+            LayoutId(id: 1, child: widget.primary),
+            LayoutId(id: 2, child: widget.secondary),
+            LayoutId(
+              id: 0,
+              child: DragHandleContainer(
+                key: _dragHandleKey,
+                orientation: switch (widget.direction) {
+                  Axis.horizontal => Axis.vertical,
+                  Axis.vertical => Axis.horizontal,
+                },
+                onDrag: (details) => _onDrag(details),
+                onDragStart: (details) => _onDragStart(details),
+                onDragEnd: (details) => _onDragEnd(details),
               ),
-              children: [
-                LayoutId(id: 1, child: widget.primary),
-                LayoutId(id: 2, child: widget.secondary),
-                LayoutId(
-                  id: 0,
-                  child: DragHandleContainer(
-                    orientation: switch (widget.direction) {
-                      Axis.horizontal => Axis.vertical,
-                      Axis.vertical => Axis.horizontal,
-                    },
-                    onDrag: (details) => _onDrag(details, width, height),
-                    onDragEnd: (details) => _onDragEnd(details, width, height),
-                  ),
-                ),
-              ],
-            );
-          },
+            ),
+          ],
         );
       },
     );
   }
 
-  void _onDrag(DragUpdateDetails details, double width, double height) {
-    final RenderBox renderBox = context.findRenderObject() as RenderBox;
-    final Offset(:dx, :dy) = renderBox.globalToLocal(details.globalPosition);
+  void _onDrag(DragUpdateDetails details) {
+    final renderBox = context.findRenderObject() as RenderBox;
 
-    final fraction = switch (widget.direction) {
-      Axis.horizontal => dx.clamp(0.0, width) / width,
-      Axis.vertical => dy.clamp(0.0, height) / height,
+    final dragHandleRenderBox =
+        _dragHandleKey.currentContext!.findRenderObject() as RenderBox;
+
+    final dragHandleExtent = switch (widget.direction) {
+      Axis.horizontal => dragHandleRenderBox.size.width,
+      Axis.vertical => dragHandleRenderBox.size.height,
     };
+
+    final dragOffset = renderBox.globalToLocal(details.globalPosition);
+    final dragExtent = switch (widget.direction) {
+      Axis.horizontal => dragOffset.dx,
+      Axis.vertical => dragOffset.dy,
+    };
+
+    final offset = switch (widget.direction) {
+      Axis.horizontal => _startOffset.dx,
+      Axis.vertical => _startOffset.dy,
+    };
+
+    // relative to the drag handle's center
+    final relativeOffset = offset - (dragHandleExtent / 2);
+
+    final splitPaneExtent = switch (widget.direction) {
+      Axis.horizontal => renderBox.size.width,
+      Axis.vertical => renderBox.size.height,
+    };
+
+    final fraction =
+        ((dragExtent - relativeOffset) / splitPaneExtent).clamp(0.0, 1.0);
 
     _controller.setToFraction(fraction);
   }
 
-  void _onDragEnd(DragEndDetails details, double width, double height) {
-    snap(switch (widget.direction) {
-      Axis.horizontal => width,
-      Axis.vertical => height,
-    });
+  void _onDragStart(DragStartDetails details) {
+    _startOffset = details.localPosition;
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    final renderBox = context.findRenderObject() as RenderBox;
+
+    final extent = switch (widget.direction) {
+      Axis.horizontal => renderBox.size.width,
+      Axis.vertical => renderBox.size.height,
+    };
+
+    snap(extent);
   }
 
   void snap(double containerSize) {
@@ -179,16 +211,14 @@ class _SplitPaneState extends State<SplitPane> with TickerProviderStateMixin {
     bool useFraction = false;
 
     if (closestAbsoluteSnapPoint == null) {
-      useFraction = true;
-    } else {
-      final absoluteDistance =
-          (closestAbsoluteSnapPoint - currentAbsolute).abs();
-      final fractionalDistance =
-          ((closestFractionalSnapPoint * containerSize) - currentAbsolute)
-              .abs();
-
-      useFraction = fractionalDistance < absoluteDistance;
+      return (closestFractionalSnapPoint, true);
     }
+
+    final absoluteDistance = (closestAbsoluteSnapPoint - currentAbsolute).abs();
+    final fractionalDistance =
+        ((closestFractionalSnapPoint * containerSize) - currentAbsolute).abs();
+
+    useFraction = fractionalDistance < absoluteDistance;
 
     return (
       useFraction ? closestFractionalSnapPoint : closestAbsoluteSnapPoint!,
