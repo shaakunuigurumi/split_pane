@@ -10,18 +10,21 @@ class SplitController extends ChangeNotifier {
   /// If true, the [position] value is the absolute position of the split pane
   /// in dp. If false, the [position] value is a fraction of the container size
   /// (e.g. `0.5` for 50%).
-
-  bool isAbsolute = false;
+  bool isAbsolute;
 
   /// The current position .
   ///
   /// See also:
   ///
   /// - [isAbsolute], which determines whether this value is absolute or a fraction.
-  double position = 0.5;
+  double position;
 
   /// Creates a new [SplitController].
-  SplitController({required TickerProvider vsync}) {
+  SplitController({
+    required TickerProvider vsync,
+    this.isAbsolute = false,
+    this.position = 0.5,
+  }) {
     _animationController = AnimationController.unbounded(
       value: position,
       vsync: vsync,
